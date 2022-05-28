@@ -37,7 +37,7 @@ function verifyJWT(req, res, next) {
 async function run() {
   try {
     await client.connect();
-    //const servicesCollections = client.db('DoctorsPortal').collection('services');
+    const userCollections = client.db('SemiconductorInc').collection('user');
 
     //verify admin
     const verifyAdmin = async (req, res, next) => {
@@ -50,7 +50,19 @@ async function run() {
       }
     };
 
-    
+    /***********************
+    User Management
+     **********************/
+    //update or inset an user
+    app.put('/user', async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email };
+      const options = { upsert: true };
+      const updatedDoc = { $set: user };
+      const result = await userCollections.updateOne(filter, updatedDoc, options);
+      const token = jwt.sign({ email: user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+      res.send({ result, token });
+    });
   } finally {
 
   }
