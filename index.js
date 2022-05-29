@@ -39,6 +39,7 @@ async function run() {
     await client.connect();
     const userCollections = client.db('SemiconductorInc').collection('user');
     const productCollections = client.db('SemiconductorInc').collection('product');
+    const orderCollections = client.db('SemiconductorInc').collection('orders');
 
     //verify admin
     const verifyAdmin = async (req, res, next) => {
@@ -54,19 +55,25 @@ async function run() {
     Product Management
      **********************/
     //get all products
-    app.get('/products', verifyJWT,verifyAdmin, async (req, res) => {
+    app.get('/products', verifyJWT, verifyAdmin, async (req, res) => {
       const products = productCollections.find();
       const result = await products.toArray();
       res.send(result);
     });
     //get 6 products
-    app.get('/product', async (req, res) => {
+    app.get('/product', verifyJWT, async (req, res) => {
       const products = productCollections.find();
       const result = await products.limit(6).toArray();
       res.send(result);
     });
+    //get a products with id
+    app.get('/item/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;;
+      const product = await productCollections.findOne({ _id: ObjectId(id) });
+      res.send(product);
+    });
     //add a product
-    app.post('/product',verifyJWT,verifyAdmin, async (req, res) => {
+    app.post('/product', verifyJWT, verifyAdmin, async (req, res) => {
       const product = req.body;
       res.send(await productCollections.insertOne(product));
     });
@@ -77,7 +84,21 @@ async function run() {
       res.send(result);
     });
 
-
+    /***********************
+Orders Management
+ **********************/
+    //add a order
+    app.post('/order', verifyJWT, async (req, res) => {
+      const product = req.body;
+      res.send(await orderCollections.insertOne(product));
+    });
+    //get all orders
+    app.get('/orders', verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      const orders = orderCollections.find({email:email});
+      const result = await orders.toArray();
+      res.send(result);
+    });
     /***********************
     User Management
      **********************/
