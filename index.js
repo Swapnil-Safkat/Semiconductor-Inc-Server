@@ -63,6 +63,21 @@ async function run() {
       const token = jwt.sign({ email: user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
       res.send({ result, token });
     });
+    //update profile
+    app.put('/profile', verifyJWT, async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email };
+      const options = { upsert: true };
+      const updatedDoc = { $set: user };
+      const result = await userCollections.updateOne(filter, updatedDoc, options);
+      res.send({ result });
+    });
+    //get user with email
+    app.get('/user/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollections.findOne({ email: email });
+      res.send(user);
+    });
   } finally {
 
   }
