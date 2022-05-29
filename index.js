@@ -53,14 +53,30 @@ async function run() {
     /***********************
     Product Management
      **********************/
-    app.get('/products', verifyJWT, async (req, res) => {
-      res.send(await productCollections.find().toArray());
+    //get all products
+    app.get('/products', verifyJWT,verifyAdmin, async (req, res) => {
+      const products = productCollections.find();
+      const result = await products.toArray();
+      res.send(result);
     });
-    app.post('/product', async (req, res) => {
+    //get 6 products
+    app.get('/product', async (req, res) => {
+      const products = productCollections.find();
+      const result = await products.limit(6).toArray();
+      res.send(result);
+    });
+    //add a product
+    app.post('/product',verifyJWT,verifyAdmin, async (req, res) => {
       const product = req.body;
       res.send(await productCollections.insertOne(product));
-
     });
+    //remove a product
+    app.delete('/product/:id', verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const result = await productCollections.deleteOne({ _id: ObjectId(id) });
+      res.send(result);
+    });
+
 
     /***********************
     User Management
