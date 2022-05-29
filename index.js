@@ -38,6 +38,7 @@ async function run() {
   try {
     await client.connect();
     const userCollections = client.db('SemiconductorInc').collection('user');
+    const productCollections = client.db('SemiconductorInc').collection('product');
 
     //verify admin
     const verifyAdmin = async (req, res, next) => {
@@ -49,10 +50,24 @@ async function run() {
         res.status(403).send({ message: 'forbidden' });
       }
     };
+    /***********************
+    Product Management
+     **********************/
+    app.get('/products', verifyJWT, async (req, res) => {
+      res.send(await productCollections.find().toArray());
+    });
+    app.post('/product', async (req, res) => {
+
+      res.send();
+    });
 
     /***********************
     User Management
      **********************/
+    //get all users
+    app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
+      res.send(await userCollections.find().toArray());
+    });
     //update or inset an user
     app.put('/user', async (req, res) => {
       const user = req.body;
@@ -78,6 +93,29 @@ async function run() {
       const user = await userCollections.findOne({ email: email });
       res.send(user);
     });
+
+
+    /***********************
+    Admin Management
+     **********************/
+    //getting admin
+    app.get('/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollections.findOne({ email: email });
+      if (user?.role === 'admin') res.send({ isAdmin: true });
+      else res.send({ isAdmin: false });
+    });
+    //making or removing  admin
+    app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const role = req.body.role;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updatedDoc = { $set: { role } };
+      const result = await userCollections.updateOne(filter, updatedDoc, options);
+      res.send(result);
+    });
+
   } finally {
 
   }
