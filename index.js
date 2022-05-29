@@ -57,8 +57,9 @@ async function run() {
       res.send(await productCollections.find().toArray());
     });
     app.post('/product', async (req, res) => {
+      const product = req.body;
+      res.send(await productCollections.insertOne(product));
 
-      res.send();
     });
 
     /***********************
