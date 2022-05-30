@@ -40,6 +40,7 @@ async function run() {
     const userCollections = client.db('SemiconductorInc').collection('user');
     const productCollections = client.db('SemiconductorInc').collection('product');
     const orderCollections = client.db('SemiconductorInc').collection('orders');
+    const opinionCollections = client.db('SemiconductorInc').collection('opinion');
 
     //verify admin
     const verifyAdmin = async (req, res, next) => {
@@ -64,6 +65,11 @@ async function run() {
     app.get('/product', verifyJWT, async (req, res) => {
       const products = productCollections.find();
       const result = await products.limit(6).toArray();
+      res.send(result);
+    });
+    //get discounted products
+    app.get('/discountedProducts', verifyJWT, async (req, res) => {
+      const result = await productCollections.find({ discount: { $exists: true } }).toArray();
       res.send(result);
     });
     //get a products with id
@@ -95,7 +101,7 @@ Orders Management
     //get all orders
     app.get('/orders', verifyJWT, async (req, res) => {
       const email = req.query.email;
-      const orders = orderCollections.find({email:email});
+      const orders = orderCollections.find({ email: email });
       const result = await orders.toArray();
       res.send(result);
     });
@@ -154,6 +160,14 @@ Orders Management
       res.send(result);
     });
 
+    /***********************
+contact use Management
+ **********************/
+    //add a opinion
+    app.post('/opinion', verifyJWT, async (req, res) => {
+      const opinion = req.body;
+      res.send(await opinionCollections.insertOne(opinion));
+    });
   } finally {
 
   }
