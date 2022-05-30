@@ -56,24 +56,24 @@ async function run() {
     Product Management
      **********************/
     //get all products
-    app.get('/products', verifyJWT, verifyAdmin, async (req, res) => {
+    app.get('/products', async (req, res) => {
       const products = productCollections.find();
       const result = await products.toArray();
       res.send(result);
     });
     //get 6 products
-    app.get('/product', verifyJWT, async (req, res) => {
+    app.get('/product', async (req, res) => {
       const products = productCollections.find();
       const result = await products.limit(6).toArray();
       res.send(result);
     });
     //get discounted products
-    app.get('/discountedProducts', verifyJWT, async (req, res) => {
+    app.get('/discountedProducts', async (req, res) => {
       const result = await productCollections.find({ discount: { $exists: true } }).toArray();
       res.send(result);
     });
     //get a products with id
-    app.get('/item/:id', verifyJWT, async (req, res) => {
+    app.get('/item/:id', async (req, res) => {
       const id = req.params.id;;
       const product = await productCollections.findOne({ _id: ObjectId(id) });
       res.send(product);
